@@ -1,0 +1,62 @@
+practice1
+SELECT * FROM Employee WHERE `name` LIKE "%n%" AND salary > 6000;
+
++----+----------+------+--------+-----------+--------+
+| id | name     | age  | gender | companyId | salary |
++----+----------+------+--------+-----------+--------+
+|  1 | xiaohong |   19 | female |         1 |   7000 |
++----+----------+------+--------+-----------+--------+
+
+practice2
+SELECT companyName,name FROM 
+(SELECT companyName,id FROM Company) a
+JOIN
+(SELECT companyId,MAX(salary) AS maxSalary FROM Employee GROUP BY companyId) b
+ON a.id = b.companyId
+JOIN
+(SELECT name,salary,companyId FROM Employee) c
+on b.maxSalary = c.salary AND b.companyId = c.companyId;
+
++-------------+----------+
+| companyName | name     |
++-------------+----------+
+| baidu       | xiaoming |
+| alibaba     | xiaohong |
+| tengxun     | xiaozhi  |
++-------------+----------+
+
+practice3
+SELECT companyName,avgSalary FROM
+(SELECT companyId,AVG(salary) as avgSalary FROM Employee GROUP BY companyId) a
+JOIN
+(SELECT id,companyName FROM company) b
+on a.companyId = b.id 
+ORDER BY avgSalary DESC
+LIMIT 1
+
++-------------+-----------+
+| companyName | avgSalary |
++-------------+-----------+
+| tengxun     | 8000.0000 |
++-------------+-----------+
+
+practice4
+SELECT id,name,age,gender,d.companyId,salary,companyName,avgsal FROM
+(
+SELECT companyId,companyName,avgsal FROM
+(SELECT companyId,AVG(salary) as avgsal FROM Employee GROUP BY companyId) a
+JOIN
+(SELECT id,companyName FROM company) b
+on a.companyId = b.id 
+) c
+JOIN
+(SELECT * FROM employee) d
+ON c.companyId = d.companyId
+WHERE d.salary > avgsal;
+
++----+----------+------+--------+-----------+--------+-------------+-----------+
+| id | name     | age  | gender | companyId | salary | companyName | avgsal    |
++----+----------+------+--------+-----------+--------+-------------+-----------+
+|  0 | xiaoming |   20 | male   |         0 |   6000 | baidu       | 5000.0000 |
+|  1 | xiaohong |   19 | female |         1 |   7000 | alibaba     | 6500.0000 |
++----+----------+------+--------+-----------+--------+-------------+-----------+
